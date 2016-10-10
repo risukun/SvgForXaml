@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Windows.Data.Xml.Dom;
+using System;
+using Mntone.SvgForXaml.Text;
 
 namespace Mntone.SvgForXaml
 {
@@ -52,6 +54,14 @@ namespace Mntone.SvgForXaml
 
 		[System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
 		public SvgElement LastChild => this.ChildNodes.LastOrDefault();
+
+        public StyleInheritanceBehavior StyleInheritanceBehavior
+        {
+            get
+            {
+                return ParentNode.StyleInheritanceBehavior;
+            }
+        }
 
 		public virtual INode CloneNode(bool deep = false)
 		{
@@ -157,6 +167,10 @@ namespace Mntone.SvgForXaml
 					case "clipPath":
 						result.Add(new SvgClipPathElement(parent, elementNode));
 						break;
+
+                    case "text":
+                        result.Add(new SvgTextElement(parent, elementNode));
+                        break;
 
 					default:
 						System.Diagnostics.Debug.WriteLine($"Not supported tag: {elementNode.TagName}");

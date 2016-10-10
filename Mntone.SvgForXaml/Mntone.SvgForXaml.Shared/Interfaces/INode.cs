@@ -9,6 +9,7 @@ namespace Mntone.SvgForXaml.Interfaces
 		IReadOnlyCollection<SvgElement> ChildNodes { get; }
 		SvgElement FirstChild { get; }
 		SvgElement LastChild { get; }
+        StyleInheritanceBehavior StyleInheritanceBehavior { get; }
 
 		INode CloneNode(bool deep = false);
 	}

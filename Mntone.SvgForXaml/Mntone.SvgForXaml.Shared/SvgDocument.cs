@@ -15,6 +15,9 @@ namespace Mntone.SvgForXaml
 		private SvgDocument()
 		{
 			this._idCache = new Dictionary<string, SvgElement>();
+
+            this.StyleInheritanceBehavior = StyleInheritanceBehavior.All;
+            this.TextRenderingEnabled = false;
 		}
 
 		[System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
@@ -46,6 +49,9 @@ namespace Mntone.SvgForXaml
 		}
 
 		public SvgSvgElement RootElement { get; private set; }
+
+        public StyleInheritanceBehavior StyleInheritanceBehavior { get; set; }
+        public bool TextRenderingEnabled { get; set; }
 
 		internal void AddIdCache(string id, SvgElement element)
 		{

@@ -12,6 +12,8 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using Windows.Foundation;
 using Windows.UI;
+using Mntone.SvgForXaml.Text;
+using Microsoft.Graphics.Canvas.Text;
 
 #if WINDOWS_UWP
 using System.Numerics;
@@ -124,7 +126,11 @@ namespace Mntone.SvgForXaml
 					{
 						var pen = this.CreatePaint(session, area, stroke, style.StrokeOpacity);
 						var strokeWidth = style.StrokeWidth;
-						session.DrawGeometry(geometry2, pen, strokeWidth.HasValue ? this.LengthConverter.Convert(strokeWidth.Value) : 1.0F);
+                        CanvasStrokeStyle strokeStyle = new CanvasStrokeStyle();
+                        strokeStyle.StartCap = this.CreateCap(style.LineCap);
+                        strokeStyle.EndCap = this.CreateCap(style.LineCap);
+                        strokeStyle.LineJoin = this.CreateLineJoin(style.LineJoin);
+                        session.DrawGeometry(geometry2, pen, strokeWidth.HasValue ? this.LengthConverter.Convert(strokeWidth.Value) : 1.0F, strokeStyle);
 					}
 				}
 			}
@@ -133,6 +139,48 @@ namespace Mntone.SvgForXaml
 				if (change) geometry2.Dispose();
 				if (opacityBrush != null) opacityBrush.Dispose();
 			}
+		}
+
+        private CanvasLineJoin CreateLineJoin(SvgLineJoin lineJoin)
+        {
+            CanvasLineJoin joinStyle = CanvasLineJoin.Miter;
+            if (lineJoin != null)
+            {
+                switch (lineJoin.LineJoinType)
+                {
+                    case SvgLineJoinType.Miter:
+                        joinStyle = CanvasLineJoin.Miter;
+                        break;
+                    case SvgLineJoinType.Round:
+                        joinStyle = CanvasLineJoin.Round;
+                        break;
+                    case SvgLineJoinType.Bevel:
+                        joinStyle = CanvasLineJoin.Bevel;
+                        break;
+                }
+            }
+            return joinStyle;
+        }
+
+        private CanvasCapStyle CreateCap(SvgLineCap lineCap)
+        {
+            CanvasCapStyle capStyle = CanvasCapStyle.Flat;
+            if (lineCap != null)
+            {
+                switch (lineCap.LineCapType)
+                {
+                    case SvgLineCapType.Flat:
+                        capStyle = CanvasCapStyle.Flat;
+                        break;
+                    case SvgLineCapType.Round:
+                        capStyle = CanvasCapStyle.Round;
+                        break;
+                    case SvgLineCapType.Square:
+                        capStyle = CanvasCapStyle.Square;
+                        break;
+                }
+            }
+            return capStyle;
 		}
 
 		protected override void RenderPath(CanvasDrawingSession session, SvgPathElement element)
@@ -154,6 +202,35 @@ namespace Mntone.SvgForXaml
 				this.RenderGeometory(session, geometry, element.Transform.Result, element.Style);
 			}
 		}
+
+        protected override void RenderText(CanvasDrawingSession session, SvgTextElement element)
+        {
+            CanvasTextFormat textFormat = new CanvasTextFormat();
+            if (element.Style.FontSize.HasValue)
+            {
+                textFormat.FontSize = element.Style.FontSize.Value;
+            }
+
+            // CONSIDER: add support for "font-family" style 
+            //if (element.Style.FontFamily != null)
+            //{
+            //    textFormat.FontFamily = element.Style.FontFamily;
+            //}
+
+            // Provide default Latin script alignment-baseline:baseline behavior (y value is on text baseline).
+            // (Win2D by default draws text based with y as the top of the bounding box)
+            textFormat.LineSpacingBaseline = 0.0f;
+            textFormat.LineSpacingMode = CanvasLineSpacingMode.Proportional;
+
+            // CONSIDER: pass in rect based on entire canvas size
+            float requestWidth = 1000;
+            float requestedHeight = 1000;
+            CanvasTextLayout textLayout = new CanvasTextLayout(this.ResourceCreator, element.TextContent, textFormat, requestWidth, requestedHeight);            
+            using (var geometry = CanvasGeometry.CreateText(textLayout))
+            {
+                this.RenderGeometory(session, geometry, element.Transform.Result, element.Style);
+            }
+        }
 
 		protected override void RenderCircle(CanvasDrawingSession session, SvgCircleElement element)
 		{
@@ -193,7 +270,12 @@ namespace Mntone.SvgForXaml
 				{
 					var pen = this.CreatePaint(session, area, stroke, element.Style.StrokeOpacity);
 					var width = element.Style.StrokeWidth;
-					session.DrawLine(x1, y1, x2, y2, pen, width.HasValue ? this.LengthConverter.Convert(width.Value) : 1.0F);
+
+                    CanvasStrokeStyle strokeStyle = new CanvasStrokeStyle();
+                    strokeStyle.StartCap = this.CreateCap(element.Style.LineCap);
+                    strokeStyle.EndCap = this.CreateCap(element.Style.LineCap);
+                    strokeStyle.LineJoin = this.CreateLineJoin(element.Style.LineJoin);
+                    session.DrawLine(x1, y1, x2, y2, pen, width.HasValue ? this.LengthConverter.Convert(width.Value) : 1.0F, strokeStyle);
 				}
 			}
 		}

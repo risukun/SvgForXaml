@@ -70,7 +70,8 @@ namespace Mntone.SvgForXaml
 		{
 			if (!this._cache.ContainsKey(propertyName))
 			{
-				if (!NON_INHERIT_PROPERTIES.Any(p => p == propertyName))
+				if (this._parent.StyleInheritanceBehavior == StyleInheritanceBehavior.All ||
+                    !NON_INHERIT_PROPERTIES.Any(p => p == propertyName))
 				{
 					var target = ((INode)this._parent)?.ParentNode as ISvgStylable;
 					if (target != null)
@@ -95,6 +96,9 @@ namespace Mntone.SvgForXaml
 		public SvgNumber? StopOpacity => this.GetPropertyCssValue("stop-opacity") as SvgNumber?;
 		public SvgIri ClipPath => this.GetPropertyCssValue("clip-path") as SvgIri;
 		public SvgNumber? Opacity => this.GetPropertyCssValue("opacity") as SvgNumber?;
+        public SvgLineCap LineCap => this.GetPropertyCssValue("stroke-linecap") as SvgLineCap;
+        public SvgLineJoin LineJoin => this.GetPropertyCssValue("stroke-linejoin") as SvgLineJoin;
+        public SvgNumber? FontSize => this.GetPropertyCssValue("font-size") as SvgNumber?;
 
 		private void ParseText(string css)
 		{
@@ -149,6 +153,17 @@ namespace Mntone.SvgForXaml
 				case "clip-rule":
 					parsedValue = new SvgFillRule(presentation ? value : value.ToLower());
 					break;
+
+                case "stroke-linecap":
+                    parsedValue = new SvgLineCap(presentation ? value : value.ToLower());
+                    break;
+                case "stroke-linejoin":
+                    parsedValue = new SvgLineJoin(presentation ? value : value.ToLower());
+                    break;
+
+                case "font-size":
+                    parsedValue = SvgNumber.Parse(value);
+                    break;
 			}
 
 			if (!this._cache.ContainsKey(name))

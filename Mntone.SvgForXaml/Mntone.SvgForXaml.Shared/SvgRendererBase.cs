@@ -1,7 +1,9 @@
 ﻿using Mntone.SvgForXaml.Path;
 using Mntone.SvgForXaml.Primitives;
 using Mntone.SvgForXaml.Shapes;
+using Mntone.SvgForXaml.Text;
 using System.Collections.Generic;
+using System;
 
 namespace Mntone.SvgForXaml
 {
@@ -34,7 +36,7 @@ namespace Mntone.SvgForXaml
 		protected abstract void RenderLine(TSession session, SvgLineElement element);
 		protected abstract void RenderPolyline(TSession session, SvgPolylineElement element);
 		protected abstract void RenderPolygon(TSession session, SvgPolygonElement element);
-
+        protected abstract void RenderText(TSession session, SvgTextElement element);
 		protected virtual void RenderChildren(TSession session, IReadOnlyCollection<SvgElement> elements)
 		{
 			foreach (var element in elements) this.RenderChild(session, element);
@@ -82,6 +84,13 @@ namespace Mntone.SvgForXaml
 			{
 				this.RenderPolygon(session, (SvgPolygonElement)element);
 			}
+            else if (element.GetType() == typeof(SvgTextElement))
+            {
+                if (this.TargetDocument.TextRenderingEnabled)
+                {
+                    this.RenderText(session, (SvgTextElement)element);
+                }
+            }
 		}
 	}
 }

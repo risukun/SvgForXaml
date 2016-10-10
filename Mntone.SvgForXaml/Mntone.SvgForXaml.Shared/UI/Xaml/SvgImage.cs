@@ -1,4 +1,5 @@
 ﻿using Microsoft.Graphics.Canvas.UI.Xaml;
+using Mntone.SvgForXaml.Interfaces;
 using System;
 using System.IO;
 using System.Numerics;
@@ -26,6 +27,24 @@ namespace Mntone.SvgForXaml.UI.Xaml
 
 		public static readonly DependencyProperty ContentProperty
 			= DependencyProperty.Register(nameof(Content), typeof(SvgDocument), typeof(SvgImage), new PropertyMetadata(null, OnContentChangedDelegate));
+
+        public StyleInheritanceBehavior StyleInheritanceBehavior
+        {
+            get { return (StyleInheritanceBehavior)base.GetValue(StyleInheritanceBehaviorProperty); }
+            set { base.SetValue(StyleInheritanceBehaviorProperty, value); }
+        }
+
+        public static readonly DependencyProperty StyleInheritanceBehaviorProperty
+            = DependencyProperty.Register(nameof(StyleInheritanceBehavior), typeof(StyleInheritanceBehavior), typeof(SvgImage), new PropertyMetadata(StyleInheritanceBehavior.All, OnStyleInheritanceBehaviorChangedDelegate));
+
+        public bool TextRenderingEnabled
+        {
+            get { return (bool)base.GetValue(TextRenderingEnabledProperty); }
+            set { base.SetValue(TextRenderingEnabledProperty, value); }
+        }
+
+        public static readonly DependencyProperty TextRenderingEnabledProperty
+            = DependencyProperty.Register(nameof(TextRenderingEnabled), typeof(bool), typeof(SvgImage), new PropertyMetadata(false, OnTextRenderingEnabledChangedDelegate));
 
 		public SvgImage()
 			: base()
@@ -80,12 +99,34 @@ namespace Mntone.SvgForXaml.UI.Xaml
 				this._renderer = null;
 			}
 
+            if (this.Content != null)
+            {
+                this.Content.StyleInheritanceBehavior = this.StyleInheritanceBehavior;
+                this.Content.TextRenderingEnabled = this.TextRenderingEnabled;
+            }
+
 			if (svg != null && this._canvasControl != null)
 			{
 				this._renderer = new Win2dRenderer(this._canvasControl, svg);
 				this._canvasControl?.Invalidate();
 			}
 		}
+
+        private static void OnStyleInheritanceBehaviorChangedDelegate(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((SvgImage)d).OnStyleInheritanceBehaviorChanged((StyleInheritanceBehavior)e.NewValue);
+
+        private void OnStyleInheritanceBehaviorChanged(StyleInheritanceBehavior behavior)
+        {
+            // Changing this property requires rendering the content
+            OnContentChanged(this.Content);
+        }
+
+        private static void OnTextRenderingEnabledChangedDelegate(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((SvgImage)d).OnTextRenderingEnabledChanged((bool)e.NewValue);
+
+        private void OnTextRenderingEnabledChanged(bool enabled)
+        {
+            // Changing this property requires rendering the content
+            OnContentChanged(this.Content);
+        }
 
 		public void SafeUnload()
 		{

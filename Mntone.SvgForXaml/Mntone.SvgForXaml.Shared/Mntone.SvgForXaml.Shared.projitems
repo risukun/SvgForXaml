@@ -47,6 +47,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)Primitives\SvgFillRuleType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Primitives\SvgIri.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Primitives\SvgLength.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Primitives\SvgLineCap.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Primitives\SvgLineCapType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Primitives\SvgLineJoin.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Primitives\SvgLineJoinType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Primitives\SvgMatrix.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Primitives\SvgNumber.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Primitives\SvgPaint.cs" />
@@ -76,6 +80,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)SvgSymbolElement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SvgTitleElement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SvgUseElement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Text\SvgTextElement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TransformSession.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UI\Xaml\SvgImage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Win2dRenderer.cs" />
