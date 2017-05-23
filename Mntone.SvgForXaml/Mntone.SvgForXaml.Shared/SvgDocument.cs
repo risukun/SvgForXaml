@@ -51,6 +51,22 @@ namespace Mntone.SvgForXaml
 		public SvgSvgElement RootElement { get; private set; }
 
         public StyleInheritanceBehavior StyleInheritanceBehavior { get; set; }
+        public IList<T> FindDescendants<T>() where T : SvgElement
+        {
+            List<T> results = new List<T>();
+            if (_ChildNodes != null)
+            {
+                foreach (var child in _ChildNodes)
+                {
+                    if (child is T)
+                    {
+                        results.Add((T)child);
+                    }
+                    results.AddRange(child.FindDescendants<T>());
+                }
+            }
+            return results;
+        }
         public bool TextRenderingEnabled { get; set; }
 
 		internal void AddIdCache(string id, SvgElement element)

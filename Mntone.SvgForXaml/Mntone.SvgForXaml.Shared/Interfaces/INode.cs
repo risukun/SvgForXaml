@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Mntone.SvgForXaml.Interfaces
 {
@@ -10,6 +11,7 @@ namespace Mntone.SvgForXaml.Interfaces
 		SvgElement FirstChild { get; }
 		SvgElement LastChild { get; }
         StyleInheritanceBehavior StyleInheritanceBehavior { get; }
+        IList<T> FindDescendants<T>() where T : SvgElement;
 
 		INode CloneNode(bool deep = false);
 	}

@@ -61,10 +61,24 @@ namespace Mntone.SvgForXaml
 		public string GetPropertyValue(string propertyName) => this.GetPropertyValuePrivate(propertyName)?.Item1;
 		public ICssValue GetPropertyCssValue(string propertyName) => this.GetPropertyValuePrivate(propertyName)?.Item2;
 
-		internal void SetProperty(string propertyName, string value, string priority, bool presentation)
+		public void SetProperty(string propertyName, string value, string priority, bool presentation)
 		{
 			this.ParseValue(propertyName, value, priority, presentation);
 		}
+		public void SetProperty(string propertyName, string value)
+		{
+			SetProperty(propertyName, value, string.Empty, false);
+		}
+
+		public void SetProperty(string propertyName, ICssValue value, string priority, bool presentation)
+		{
+			SetCacheValue(propertyName, value.ToString(), value, priority, presentation, true);
+		}
+
+        public void SetProperty(string propertyName, ICssValue value)
+        {
+            SetProperty(propertyName, value, string.Empty, false);
+        }
 
 		private Tuple<string, ICssValue> GetPropertyValuePrivate(string propertyName)
 		{
@@ -86,19 +100,71 @@ namespace Mntone.SvgForXaml
 
 		public string this[ulong index] => this._items[(int)index];
 
-		public SvgPaint Fill => this.GetPropertyCssValue("fill") as SvgPaint;
-		public SvgNumber? FillOpacity => this.GetPropertyCssValue("fill-opacity") as SvgNumber?;
-		public SvgFillRule? FillRule => this.GetPropertyCssValue("fill-rule") as SvgFillRule?;
-		public SvgPaint Stroke => this.GetPropertyCssValue("stroke") as SvgPaint;
-		public SvgLength? StrokeWidth => this.GetPropertyCssValue("stroke-width") as SvgLength?;
-		public SvgNumber? StrokeOpacity => this.GetPropertyCssValue("stroke-opacity") as SvgNumber?;
-		public SvgColor StopColor => this.GetPropertyCssValue("stop-color") as SvgColor;
-		public SvgNumber? StopOpacity => this.GetPropertyCssValue("stop-opacity") as SvgNumber?;
-		public SvgIri ClipPath => this.GetPropertyCssValue("clip-path") as SvgIri;
-		public SvgNumber? Opacity => this.GetPropertyCssValue("opacity") as SvgNumber?;
-        public SvgLineCap LineCap => this.GetPropertyCssValue("stroke-linecap") as SvgLineCap;
-        public SvgLineJoin LineJoin => this.GetPropertyCssValue("stroke-linejoin") as SvgLineJoin;
-        public SvgNumber? FontSize => this.GetPropertyCssValue("font-size") as SvgNumber?;
+		public SvgPaint Fill
+		{
+            get { return this.GetPropertyCssValue("fill") as SvgPaint; }
+            set { SetProperty("fill", value); }
+		}
+		public SvgNumber? FillOpacity
+		{
+            get { return this.GetPropertyCssValue("fill-opacity") as SvgNumber?; }
+            set { SetProperty("fill-opacity", value); }
+		}
+		public SvgFillRule? FillRule
+		{
+            get { return this.GetPropertyCssValue("fill-rule") as SvgFillRule?; }
+            set { SetProperty("fill-rule", value); }
+		}
+		public SvgPaint Stroke
+		{
+            get { return this.GetPropertyCssValue("stroke") as SvgPaint; }
+            set { SetProperty("stroke", value); }
+		}
+        public SvgLength? StrokeWidth
+        {
+            get { return this.GetPropertyCssValue("stroke-width") as SvgLength?; }
+            set { SetProperty("stroke-width", (ICssValue)value); }
+        }
+        public SvgNumber? StrokeOpacity
+        {
+            get { return this.GetPropertyCssValue("stroke-opacity") as SvgNumber?; }
+            set { SetProperty("stroke-opacity", value); }
+        }
+        public SvgColor StopColor
+        {
+            get { return this.GetPropertyCssValue("stop-color") as SvgColor; }
+            set { SetProperty("stop-color", value); }
+        }
+        public SvgNumber? StopOpacity
+        {
+            get { return this.GetPropertyCssValue("stop-opacity") as SvgNumber?; }
+            set { SetProperty("stop-opacity", value); }
+        }
+        public SvgIri ClipPath
+        {
+            get { return this.GetPropertyCssValue("clip-path") as SvgIri; }
+            set { SetProperty("clip-path", value); }
+        }
+        public SvgNumber? Opacity
+        {
+            get { return this.GetPropertyCssValue("opacity") as SvgNumber?; }
+            set { SetProperty("opacity", value); }
+        }
+        public SvgLineCap LineCap
+        {
+            get { return this.GetPropertyCssValue("stroke-linecap") as SvgLineCap; }
+            set { SetProperty("stroke-linecap", value); }
+        }
+        public SvgLineJoin LineJoin
+        {
+            get { return this.GetPropertyCssValue("stroke-linejoin") as SvgLineJoin; }
+            set { SetProperty("stroke-linejoin", value); }
+        }
+        public SvgNumber? FontSize
+        {
+            get { return this.GetPropertyCssValue("font-size") as SvgNumber?; }
+            set { SetProperty("font-size", value); }
+        }
 
 		private void ParseText(string css)
 		{
@@ -119,7 +185,6 @@ namespace Mntone.SvgForXaml
 
 		private Tuple<string, ICssValue> ParseValue(string name, string value, string priority, bool presentation)
 		{
-			var important = priority == "important";
 			if (!presentation) name = name.ToLower();
 
 			ICssValue parsedValue = null;
@@ -166,18 +231,27 @@ namespace Mntone.SvgForXaml
                     break;
 			}
 
-			if (!this._cache.ContainsKey(name))
-			{
-				var result = Tuple.Create(value, parsedValue);
-				this._cache.Add(name, result);
-				return result;
-			}
-			else if (important)
-			{
-				var result = Tuple.Create(value, parsedValue);
-				this._cache[name] = result;
-				return result;
-			}
+
+            return SetCacheValue(name, value, parsedValue, priority, presentation, false);
+		}
+
+        private Tuple<string, ICssValue> SetCacheValue(string name, string value, ICssValue parsedValue, string priority, bool presentation, bool replaceValue)
+        {
+            var important = priority == "important" || replaceValue;
+            if (!presentation) name = name.ToLower();
+
+            if (!this._cache.ContainsKey(name))
+            {
+                var result = Tuple.Create(value, parsedValue);
+                this._cache.Add(name, result);
+                return result;
+            }
+            else if (important)
+            {
+                var result = Tuple.Create(value, parsedValue);
+                this._cache[name] = result;
+                return result;
+            }
 
 			return null;
 		}

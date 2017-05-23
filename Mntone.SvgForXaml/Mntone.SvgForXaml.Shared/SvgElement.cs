@@ -63,7 +63,26 @@ namespace Mntone.SvgForXaml
             }
         }
 
-		public virtual INode CloneNode(bool deep = false)
+        public IList<T> FindDescendants<T>() where T : SvgElement
+        {
+            List<T> results = new List<T>();
+            if (ChildNodes != null)
+            {
+                foreach (var child in ChildNodes)
+                {
+                    if (child is T)
+                    {
+                        results.Add((T)child);
+                    }
+
+                    results.AddRange(child.FindDescendants<T>());
+                }
+            }
+            return results;
+        }
+
+
+        public virtual INode CloneNode(bool deep = false)
 		{
 			var shallow = (SvgElement)this.MemberwiseClone();
 			if (deep)
